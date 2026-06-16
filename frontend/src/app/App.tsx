@@ -17,8 +17,18 @@ export default function App() {
   const [lang, setLang] = useState<Lang>("es");
   const [dark, setDark] = useState(true);
 
-  // Shared state: demo accounts (used by Lab + Attack)
-  const [accounts, setAccounts] = useState<DemoAccount[]>(DEFAULT_ACCOUNTS);
+  // Shared state: demo accounts (used by Lab + Attack), persisted in localStorage
+  const [accounts, setAccounts] = useState<DemoAccount[]>(() => {
+    try {
+      const saved = localStorage.getItem("accounts");
+      if (saved) return JSON.parse(saved) as DemoAccount[];
+    } catch {}
+    return DEFAULT_ACCOUNTS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem("accounts", JSON.stringify(accounts));
+  }, [accounts]);
   const [attackPreSelected, setAttackPreSelected] = useState<DemoAccount | null>(null);
 
   // Existing simulator result
