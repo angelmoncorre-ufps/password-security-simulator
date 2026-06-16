@@ -31,8 +31,8 @@ export function deriveStrength(password: string): StrengthLevel {
   if (charset === 0) charset = 26;
   const entropy = len * Math.log2(charset);
   if (entropy >= 80) return "very-strong";
-  if (entropy >= 55) return "strong";
-  if (entropy >= 35) return "medium";
+  if (entropy >= 60) return "strong";
+  if (entropy >= 36) return "medium";
   return "weak";
 }
 

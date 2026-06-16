@@ -126,12 +126,15 @@ async function analyzePassword(pwd: string) {
       return `${(n / 1e12).toFixed(1)}T+`;
     };
 
+    const theoreticalCombinations = Math.pow(result.charset_size, pwd.length);
+    const theoreticalSeconds = theoreticalCombinations / 1e10 / 2;
+
     return {
       strength: result.strength as "weak" | "medium" | "strong",
       entropy: result.entropy,
       charset: result.charset_size,
-      crackTimeSeconds: result.elapsed_time,
-      crackTimeLabel: formatTime(result.elapsed_time),
+      crackTimeSeconds: theoreticalSeconds,
+      crackTimeLabel: formatTime(theoreticalSeconds),
       attempts: result.attempts,
       attemptsLabel: formatAttempts(result.attempts),
       found: result.strength === "weak",

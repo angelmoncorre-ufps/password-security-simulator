@@ -13,6 +13,7 @@ All passwords are fictional and used for demonstration purposes only.
 import time
 import random
 import string
+import math
 from typing import List, Tuple, Dict, Optional
 from dataclasses import dataclass
 from enum import Enum
@@ -68,11 +69,12 @@ class PasswordSimulator:
     ]
     
     # Character sets for password generation
+    # Must match frontend charset detection (26+26+10+33=95)
     CHARSETS = {
         "lowercase": string.ascii_lowercase,
         "uppercase": string.ascii_uppercase,
         "digits": string.digits,
-        "special": "!@#$%^&*"
+        "special": string.punctuation + " ",
     }
     
     def __init__(self, mode: SimulationMode = SimulationMode.NORMAL):
@@ -84,11 +86,11 @@ class PasswordSimulator:
         }[mode]
     
     def calculate_entropy(self, password: str) -> float:
-        """Calculate password entropy in bits."""
+        """Calculate password entropy in bits using Shannon entropy."""
         charset_size = self._get_charset_size(password)
         if charset_size == 0:
             return 0.0
-        return len(password) * (charset_size.bit_length() - 1)
+        return len(password) * math.log2(charset_size)
     
     def _get_charset_size(self, password: str) -> int:
         """Get the size of the character set used in the password."""
