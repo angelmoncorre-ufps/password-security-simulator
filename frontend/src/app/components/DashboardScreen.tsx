@@ -114,8 +114,9 @@ function computeCrackTime(pwd: string): string {
   if (secs < 3600) return `${(secs / 60).toFixed(1)} min`;
   if (secs < 86400) return `${(secs / 3600).toFixed(1)} hrs`;
   if (secs < 31536000) return `${(secs / 86400).toFixed(0)} days`;
-  if (secs < 3.154e9) return `${(secs / 31536000).toFixed(0)} yrs`;
-  return `${(secs / 3.154e13).toFixed(0)}M yrs`;
+  if (secs < 3.154e10) return `${(secs / 31536000).toFixed(0)} yrs`;
+  if (secs < 3.154e13) return `${(secs / 3.154e10).toFixed(0)}K yrs`;
+  return `${(secs / 3.154e13).toFixed(1)}M yrs`;
 }
 
 type AccountSim = {

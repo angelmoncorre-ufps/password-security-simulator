@@ -43,8 +43,9 @@ export function formatTime(s: number): string {
   if (s < 3600) return `${(s / 60).toFixed(1)} min`;
   if (s < 86400) return `${(s / 3600).toFixed(1)} hrs`;
   if (s < 31536000) return `${(s / 86400).toFixed(0)} days`;
-  if (s < 3.154e9) return `${(s / 31536000).toFixed(0)} yrs`;
-  return `${(s / 3.154e13).toFixed(0)}M yrs`;
+  if (s < 3.154e10) return `${(s / 31536000).toFixed(0)} yrs`;
+  if (s < 3.154e13) return `${(s / 3.154e10).toFixed(0)}K yrs`;
+  return `${(s / 3.154e13).toFixed(1)}M yrs`;
 }
 
 export function computeStats(password: string) {
