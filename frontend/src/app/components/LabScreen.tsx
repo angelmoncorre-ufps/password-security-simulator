@@ -2,10 +2,10 @@ import { useState, useMemo, useEffect } from "react";
 import {
   Plus, Trash2, Edit3, Search, RefreshCw, AlertTriangle,
   ShieldX, Shield, ShieldCheck, ShieldAlert, Eye, EyeOff,
-  Mail, Lock, Filter, Zap, CheckCircle, XCircle, AlertCircle, Info,
+  Mail, Lock, Filter, Zap, Info,
   Database, Users, Clock, TrendingUp, BarChart3, Layers, Activity,
 } from "lucide-react";
-import { DemoAccount, StrengthLevel, AccountStatus, deriveStrength, generateRandomAccount } from "./types";
+import { DemoAccount, StrengthLevel, deriveStrength, generateRandomAccount } from "./types";
 
 type Lang = "en" | "es";
 interface Props { lang: Lang; dark: boolean; accounts: DemoAccount[]; setAccounts: (a: DemoAccount[]) => void; onSelectForAttack: (a: DemoAccount) => void; }
@@ -19,15 +19,14 @@ const t = {
     filterAll: "All",
     addBtn: "Add Account",
     generateBtn: "Generate Random",
-    colEmail: "Email", colPassword: "Password", colStrength: "Strength", colStatus: "Status", colActions: "Actions",
+    colEmail: "Email", colPassword: "Password", colStrength: "Strength", colActions: "Actions",
     weak: "Weak", medium: "Medium", strong: "Strong", veryStrong: "Very Strong",
-    active: "Active", compromised: "Compromised", risky: "Risky", secure: "Secure",
     attackBtn: "Attack",
     editTitle: "Edit Account", addTitle: "New Account",
-    emailLabel: "Email", passwordLabel: "Password", statusLabel: "Status", noteLabel: "Note (optional)",
+    emailLabel: "Email", passwordLabel: "Password", noteLabel: "Note (optional)",
     saveBtn: "Save", cancelBtn: "Cancel", deleteConfirm: "Delete this account?",
     noResults: "No accounts found", noResultsSub: "Try a different search or filter",
-    totalLabel: "Total", weakLabel: "Weak", compromisedLabel: "Compromised", secureLabel: "Secure",
+    totalLabel: "Total", weakLabel: "Weak", mediumLabel: "Medium", strongLabel: "Strong",
     showPwd: "Show", hidePwd: "Hide",
     entropyLabel: "Entropy", charsetLabel: "Charset",
   },
@@ -39,15 +38,14 @@ const t = {
     filterAll: "Todos",
     addBtn: "Agregar Cuenta",
     generateBtn: "Generar Aleatoria",
-    colEmail: "Email", colPassword: "Contraseña", colStrength: "Fortaleza", colStatus: "Estado", colActions: "Acciones",
+    colEmail: "Email", colPassword: "Contraseña", colStrength: "Fortaleza", colActions: "Acciones",
     weak: "Débil", medium: "Media", strong: "Fuerte", veryStrong: "Muy Fuerte",
-    active: "Activa", compromised: "Comprometida", risky: "En Riesgo", secure: "Segura",
     attackBtn: "Atacar",
     editTitle: "Editar Cuenta", addTitle: "Nueva Cuenta",
-    emailLabel: "Email", passwordLabel: "Contraseña", statusLabel: "Estado", noteLabel: "Nota (opcional)",
+    emailLabel: "Email", passwordLabel: "Contraseña", noteLabel: "Nota (opcional)",
     saveBtn: "Guardar", cancelBtn: "Cancelar", deleteConfirm: "¿Eliminar esta cuenta?",
     noResults: "No se encontraron cuentas", noResultsSub: "Prueba otra búsqueda o filtro",
-    totalLabel: "Total", weakLabel: "Débiles", compromisedLabel: "Comprometidas", secureLabel: "Seguras",
+    totalLabel: "Total", weakLabel: "Débiles", mediumLabel: "Media", strongLabel: "Fuertes",
     showPwd: "Ver", hidePwd: "Ocultar",
     entropyLabel: "Entropía", charsetLabel: "Charset",
   },
@@ -58,13 +56,6 @@ const strengthConfig = {
   "medium":      { color: "var(--cyber-amber)",  icon: ShieldAlert, bg: "rgba(251,191,36,0.12)",  border: "rgba(251,191,36,0.3)" },
   "strong":      { color: "var(--cyber-blue)",   icon: Shield,      bg: "rgba(59,130,246,0.12)",  border: "rgba(59,130,246,0.3)" },
   "very-strong": { color: "var(--cyber-green)",  icon: ShieldCheck, bg: "rgba(16,185,129,0.12)",  border: "rgba(16,185,129,0.3)" },
-};
-
-const statusConfig = {
-  "active":      { color: "var(--cyber-blue)",   icon: Info,         label: { en: "Active",       es: "Activa" } },
-  "compromised": { color: "var(--cyber-red)",    icon: XCircle,      label: { en: "Compromised",  es: "Comprometida" } },
-  "risky":       { color: "var(--cyber-amber)",  icon: AlertCircle,  label: { en: "Risky",        es: "En Riesgo" } },
-  "secure":      { color: "var(--cyber-green)",  icon: CheckCircle,  label: { en: "Secure",       es: "Segura" } },
 };
 
 function StrengthBadge({ strength, lang }: { strength: StrengthLevel; lang: Lang }) {
@@ -82,20 +73,6 @@ function StrengthBadge({ strength, lang }: { strength: StrengthLevel; lang: Lang
   );
 }
 
-function StatusBadge({ status, lang }: { status: AccountStatus; lang: Lang }) {
-  const cfg = statusConfig[status];
-  const Icon = cfg.icon;
-  return (
-    <span
-      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
-      style={{ color: cfg.color, background: `${cfg.color}18`, border: `1px solid ${cfg.color}40`, fontFamily: "'Rajdhani', sans-serif" }}
-    >
-      <Icon className="w-3 h-3" />
-      {cfg.label[lang]}
-    </span>
-  );
-}
-
 interface ModalProps {
   dark: boolean; lang: Lang;
   initial?: DemoAccount; mode: "add" | "edit";
@@ -106,7 +83,6 @@ function AccountModal({ dark, lang, initial, mode, onSave, onClose }: ModalProps
   const c = t[lang];
   const [email, setEmail] = useState(initial?.email ?? "");
   const [password, setPassword] = useState(initial?.password ?? "");
-  const [status, setStatus] = useState<AccountStatus>(initial?.status ?? "active");
   const [note, setNote] = useState(initial?.note ?? "");
   const [showPwd, setShowPwd] = useState(false);
 
@@ -181,19 +157,6 @@ function AccountModal({ dark, lang, initial, mode, onSave, onClose }: ModalProps
           </div>
 
           <div>
-            <label className="text-xs mb-1.5 block" style={{ color: "var(--muted-foreground)" }}>{c.statusLabel}</label>
-            <select
-              style={{ ...inputStyle, appearance: "none", cursor: "pointer" }}
-              value={status}
-              onChange={e => setStatus(e.target.value as AccountStatus)}
-            >
-              {(["active", "compromised", "risky", "secure"] as AccountStatus[]).map(s => (
-                <option key={s} value={s}>{statusConfig[s].label[lang]}</option>
-              ))}
-            </select>
-          </div>
-
-          <div>
             <label className="text-xs mb-1.5 block" style={{ color: "var(--muted-foreground)" }}>{c.noteLabel}</label>
             <input style={inputStyle} value={note} onChange={e => setNote(e.target.value)} placeholder="…" />
           </div>
@@ -201,7 +164,7 @@ function AccountModal({ dark, lang, initial, mode, onSave, onClose }: ModalProps
 
         <div className="flex gap-2 pt-1">
           <button
-            onClick={() => onSave({ email, password, strength: deriveStrength(password || "a"), status, note })}
+            onClick={() => onSave({ email, password, strength: deriveStrength(password || "a"), note })}
             disabled={!email || !password}
             className="flex-1 py-2.5 rounded-xl text-sm transition-all"
             style={{
@@ -247,8 +210,8 @@ export function LabScreen({ lang, dark, accounts, setAccounts, onSelectForAttack
   const stats = useMemo(() => ({
     total: accounts.length,
     weak: accounts.filter(a => a.strength === "weak").length,
-    compromised: accounts.filter(a => a.status === "compromised" || a.status === "risky").length,
-    secure: accounts.filter(a => a.status === "secure").length,
+    medium: accounts.filter(a => a.strength === "medium").length,
+    strong: accounts.filter(a => a.strength === "strong" || a.strength === "very-strong").length,
   }), [accounts]);
 
   const toggleReveal = (id: string) => {
@@ -323,8 +286,8 @@ export function LabScreen({ lang, dark, accounts, setAccounts, onSelectForAttack
         {[
           { label: c.totalLabel, value: stats.total, color: "var(--cyber-blue)" },
           { label: c.weakLabel, value: stats.weak, color: "var(--cyber-red)" },
-          { label: c.compromisedLabel, value: stats.compromised, color: "var(--cyber-amber)" },
-          { label: c.secureLabel, value: stats.secure, color: "var(--cyber-green)" },
+          { label: c.mediumLabel, value: stats.medium, color: "var(--cyber-amber)" },
+          { label: c.strongLabel, value: stats.strong, color: "var(--cyber-green)" },
         ].map(({ label, value, color }) => (
           <div
             key={label}
@@ -381,7 +344,7 @@ export function LabScreen({ lang, dark, accounts, setAccounts, onSelectForAttack
         <table className="w-full text-sm">
           <thead>
             <tr style={{ borderBottom: `1px solid ${cardBorder}`, background: dark ? "rgba(30,45,74,0.5)" : "rgba(241,245,249,0.8)" }}>
-              {[c.colEmail, c.colPassword, c.colStrength, c.colStatus, c.colActions].map(h => (
+              {[c.colEmail, c.colPassword, c.colStrength, c.colActions].map(h => (
                 <th
                   key={h}
                   className="text-left px-4 py-3 text-xs"
@@ -395,7 +358,7 @@ export function LabScreen({ lang, dark, accounts, setAccounts, onSelectForAttack
           <tbody>
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={5} className="text-center py-12">
+                <td colSpan={4} className="text-center py-12">
                   <div style={{ color: "var(--muted-foreground)" }}>
                     <Shield className="w-8 h-8 mx-auto mb-2 opacity-30" />
                     <p className="font-medium">{c.noResults}</p>
@@ -436,9 +399,6 @@ export function LabScreen({ lang, dark, accounts, setAccounts, onSelectForAttack
                 </td>
                 <td className="px-4 py-3">
                   <StrengthBadge strength={acc.strength} lang={lang} />
-                </td>
-                <td className="px-4 py-3">
-                  <StatusBadge status={acc.status} lang={lang} />
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-1">
@@ -521,7 +481,6 @@ export function LabScreen({ lang, dark, accounts, setAccounts, onSelectForAttack
             </div>
             <div className="flex flex-wrap items-center gap-1.5 mb-3">
               <StrengthBadge strength={acc.strength} lang={lang} />
-              <StatusBadge status={acc.status} lang={lang} />
             </div>
             <button
               onClick={() => onSelectForAttack(acc)}

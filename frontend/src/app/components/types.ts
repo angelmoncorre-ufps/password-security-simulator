@@ -1,12 +1,10 @@
 export type StrengthLevel = "weak" | "medium" | "strong" | "very-strong";
-export type AccountStatus = "active" | "compromised" | "risky" | "secure";
 
 export interface DemoAccount {
   id: string;
   email: string;
   password: string;
   strength: StrengthLevel;
-  status: AccountStatus;
   note?: string;
 }
 
@@ -65,25 +63,25 @@ export function computeStats(password: string) {
 
 export const DEFAULT_ACCOUNTS: DemoAccount[] = [
   // ── Dictionary-crackable (found in phase 1) ──
-  { id: "1", email: "carlos.lopez@demo.edu", password: "123456", strength: "weak", status: "compromised", note: "Common numeric password" },
-  { id: "2", email: "ana.martinez@demo.edu", password: "ana2024", strength: "weak", status: "risky", note: "Name + year pattern" },
-  { id: "6", email: "admin@demo.edu", password: "admin", strength: "weak", status: "compromised", note: "Default credential — never use!" },
-  { id: "8", email: "student01@demo.edu", password: "qwerty123", strength: "weak", status: "risky", note: "Keyboard pattern" },
+  { id: "1", email: "carlos.lopez@demo.edu", password: "123456", strength: "weak", note: "Common numeric password" },
+  { id: "2", email: "ana.martinez@demo.edu", password: "ana2024", strength: "weak", note: "Name + year pattern" },
+  { id: "6", email: "admin@demo.edu", password: "admin", strength: "weak", note: "Default credential — never use!" },
+  { id: "8", email: "student01@demo.edu", password: "qwerty123", strength: "weak", note: "Keyboard pattern" },
 
   // ── Rules-crackable (found in phase 2) ──
-  { id: "3", email: "test.user@demo.edu", password: "P@ssw0rd", strength: "medium", status: "active", note: "Common leet substitution" },
-  { id: "4", email: "juan.garcia@demo.edu", password: "Secur3!ty", strength: "medium", status: "active", note: "Rules-based mutation" },
+  { id: "3", email: "test.user@demo.edu", password: "P@ssw0rd", strength: "medium", note: "Common leet substitution" },
+  { id: "4", email: "juan.garcia@demo.edu", password: "Secur3!ty", strength: "medium", note: "Rules-based mutation" },
 
   // ── Brute-force only (not in dict/rules, random short) ──
   // These are mathematically weak/medium but SURVIVE dictionary + rules
-  { id: "9", email: "random.user1@demo.edu", password: "x7k9m2", strength: "weak", status: "risky", note: "Random short — survives dict, falls to brute force" },
-  { id: "10", email: "random.user2@demo.edu", password: "m3n8p2q5", strength: "medium", status: "active", note: "Random 8-char — survives dict, falls to brute force" },
-  { id: "11", email: "random.user3@demo.edu", password: "t2r8w5n1", strength: "medium", status: "active", note: "Random 8-char — survives dict and rules" },
-  { id: "12", email: "random.user4@demo.edu", password: "k9d2p3", strength: "weak", status: "risky", note: "Random short — not in any wordlist" },
+  { id: "9", email: "random.user1@demo.edu", password: "x7k9m2", strength: "weak", note: "Random short — survives dict, falls to brute force" },
+  { id: "10", email: "random.user2@demo.edu", password: "m3n8p2q5", strength: "medium", note: "Random 8-char — survives dict, falls to brute force" },
+  { id: "11", email: "random.user3@demo.edu", password: "t2r8w5n1", strength: "medium", note: "Random 8-char — survives dict and rules" },
+  { id: "12", email: "random.user4@demo.edu", password: "k9d2p3", strength: "weak", note: "Random short — not in any wordlist" },
 
   // ── Strong / very-strong ──
-  { id: "5", email: "maria.perez@demo.edu", password: "Tr0ub4dor&3!x", strength: "strong", status: "secure", note: "Passphrase-style" },
-  { id: "7", email: "prof.torres@demo.edu", password: "X#9kL!mQp@2vN7*Z", strength: "very-strong", status: "secure", note: "Random high-entropy" },
+  { id: "5", email: "maria.perez@demo.edu", password: "Tr0ub4dor&3!x", strength: "strong", note: "Passphrase-style" },
+  { id: "7", email: "prof.torres@demo.edu", password: "X#9kL!mQp@2vN7*Z", strength: "very-strong", note: "Random high-entropy" },
 ];
 
 const WORDS = ["cyber", "matrix", "ghost", "fire", "nova", "echo", "delta", "alpha", "storm", "blade"];
@@ -112,7 +110,6 @@ export function generateRandomAccount(): Omit<DemoAccount, "id"> {
   }
 
   const strength = deriveStrength(password);
-  const status: AccountStatus = strength === "weak" ? (Math.random() > 0.5 ? "compromised" : "risky") : strength === "very-strong" ? "secure" : "active";
 
-  return { email, password, strength, status };
+  return { email, password, strength };
 }
