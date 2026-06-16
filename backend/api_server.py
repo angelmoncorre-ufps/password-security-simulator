@@ -10,13 +10,29 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent))
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 
 from brute_force_simulator import PasswordSimulator, SimulationMode, SimulationResult
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder=None)
 CORS(app)
+
+FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend" / "dist"
+
+
+@app.route("/", defaults={"path": ""})
+@app.route("/<path:path>")
+def serve_frontend(path):
+    if path.startswith("api/"):
+        return jsonify({"error": "Not found"}), 404
+    file_path = FRONTEND_DIR / path
+    if file_path.exists() and file_path.is_file():
+        return send_from_directory(str(FRONTEND_DIR), path)
+    index = FRONTEND_DIR / "index.html"
+    if index.exists():
+        return send_from_directory(str(FRONTEND_DIR), "index.html")
+    return jsonify({"error": "Frontend not built. Run 'cd frontend && npx vite build' first."}), 500
 
 
 @app.route("/api/health", methods=["GET"])
@@ -83,5 +99,8 @@ def analyze():
 
 
 if __name__ == "__main__":
-    print("Starting Brute-Force Simulator API on http://localhost:5001")
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    import os
+    port = int(os.environ.get("PORT", 5001))
+    debug = os.environ.get("FLASK_ENV", "production") == "development"
+    print(f"Starting server on port {port}")
+    app.run(host="0.0.0.0", port=port, debug=debug)

@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: password-security-simulator
+    runtime: python
+    region: frankfurt
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && python api_server.py
+    envVars:
+      - key: PORT
+        value: "10000"
