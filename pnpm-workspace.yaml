@@ -1,0 +1,5 @@
+packages:
+  - 'frontend'
+allowBuilds:
+  '@tailwindcss/oxide': true
+  esbuild: true
