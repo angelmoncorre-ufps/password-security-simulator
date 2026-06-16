@@ -4,7 +4,10 @@ services:
     runtime: python
     region: frankfurt
     plan: free
-    buildCommand: pip install -r requirements.txt
+    buildCommand: |
+      pip install -r requirements.txt
+      npm install -g pnpm 2>/dev/null
+      cd frontend && pnpm install && pnpm build
     startCommand: python backend/api_server.py
     envVars:
       - key: PORT
